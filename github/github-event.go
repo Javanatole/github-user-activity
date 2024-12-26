@@ -31,3 +31,8 @@ func GetGitHubEventFromUsername(username string) ([]GitHubEvent, error) {
 	}
 	return events, nil
 }
+
+func PrintGitHubEvents(events []GitHubEvent) {
+	//for _, event := range events {
+	//}
+}
