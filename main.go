@@ -3,18 +3,32 @@ package main
 import (
 	"fmt"
 	"github-user-activitiy/github"
+	"os"
 )
 
-//TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.
-
 func main() {
-	events, err := github.GetGitHubEventFromUsername("Javanatole")
+	if len(os.Args) == 1 {
+		fmt.Println("usage: go run main.go Javanatole")
+		return
+	}
+
+	events, err := github.GetGitHubEventFromUsername(os.Args[1])
+	if err != nil {
+		fmt.Println("Can't fetch github events, please check the username or the network")
+		return
+	}
+	repositories, err := github.GetEventsByRepositories(events)
 	if err != nil {
 		panic(err)
 	}
-	for _, event := range events {
-		fmt.Println(event.Type)
+	fmt.Println("Output:")
+	for repo, events := range repositories {
+		if len(events.PushEvents) > 0 {
+			fmt.Printf("- Push %d commits to %s\n", len(events.PushEvents), repo)
+		}
+		if events.Issues > 0 {
+			fmt.Printf("- Open %d issues in %s\n", events.Issues, repo)
+		}
 	}
 }
 

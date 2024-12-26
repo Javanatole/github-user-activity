@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// GetGitHubEventFromUsername get GitHub event from username
+// GetGitHubEventFromUsername get GitHub events from username
 func GetGitHubEventFromUsername(username string) ([]GitHubEvent, error) {
 	response, err := http.Get(fmt.Sprintf("https://api.github.com/users/%s/events", username))
 	if err != nil {
@@ -32,7 +32,22 @@ func GetGitHubEventFromUsername(username string) ([]GitHubEvent, error) {
 	return events, nil
 }
 
-func PrintGitHubEvents(events []GitHubEvent) {
-	//for _, event := range events {
-	//}
+func GetEventsByRepositories(events []GitHubEvent) (map[string]*EventsByRepo, error) {
+	eventsByRepositories := make(map[string]*EventsByRepo)
+	for _, event := range events {
+		eventsByRepo, ok := eventsByRepositories[event.Repo.Name]
+		if !ok {
+			eventsByRepositories[event.Repo.Name] = &EventsByRepo{
+				PushEvents: make([]Payload, 0),
+			}
+			eventsByRepo = eventsByRepositories[event.Repo.Name]
+		}
+		if event.Type == "PushEvent" {
+			eventsByRepo.PushEvents = append(eventsByRepo.PushEvents, event.Payload)
+		}
+		if event.Type == "IssueCommentEvent" {
+			eventsByRepo.Issues += 1
+		}
+	}
+	return eventsByRepositories, nil
 }

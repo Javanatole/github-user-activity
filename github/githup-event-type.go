@@ -53,4 +53,5 @@ type Author struct {
 
 type EventsByRepo struct {
 	PushEvents []Payload
+	Issues     int16
 }
